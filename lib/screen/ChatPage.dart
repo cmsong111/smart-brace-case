@@ -160,7 +160,7 @@ class _ChatPage extends State<ChatPage> {
                   child: IconButton(
                       icon: const Icon(Icons.send),
                       onPressed: isConnected
-                          ? () => _sendMessage(textEditingController.text)
+                          ? () => _sendMessage(JsonDateInfo())
                           : null),
                 ),
               ],
@@ -245,5 +245,29 @@ class _ChatPage extends State<ChatPage> {
         setState(() {});
       }
     }
+  }
+
+//   {
+//   "hour": "10",
+//   "minute": "20",
+//   "second": "20",
+//   "day": "20",
+//   "month": "20",
+//   "year": "20"
+// }
+// like this
+  String JsonDateInfo() {
+    DateTime dateTime = DateTime.now();
+    Map<String, dynamic> json = {
+      'hour': dateTime.hour,
+      'minute': dateTime.minute,
+      'second': dateTime.second,
+      'day': dateTime.day,
+      'month': dateTime.month,
+      'year': dateTime.year,
+    };
+    String formattedDate = jsonEncode(json);
+
+    return formattedDate;
   }
 }
