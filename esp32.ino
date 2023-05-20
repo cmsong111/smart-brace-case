@@ -17,8 +17,9 @@ String device_name = "굴리오 ESP32";
 #endif
 
 BluetoothSerial SerialBT;
-StaticJsonDocument<200> doc;
-ESP32Time rtc(3600);  // offset in seconds GMT+1
+DynamicJsonDocument doc(1024);
+DynamicJsonDocument doc2(1024);
+ESP32Time rtc(3600 * 9);
 
 
 // LED on GP102
@@ -34,7 +35,7 @@ void sendMessage(String message) {
   }
   // 버퍼 비우기
   SerialBT.flush();
-  
+
   // 개행문자 추가
   SerialBT.write(13);
   SerialBT.write(10);
@@ -57,6 +58,10 @@ void setup() {
   Serial.println("Using PIN");
   doc["status"] = true;
 #endif
+}
+
+void setTime(int hour, int minute, int second, int day, int month, int year) {
+  rtc.setTime(hour, minute, second, day, month, year);
 }
 
 void loop() {
@@ -86,9 +91,21 @@ void loop() {
   if (SerialBT.available()) {  // Serial 값 수신 했을 때
     String input = SerialBT.readString();
     Serial.print(input);
+
+    deserializeJson(doc2, input);
+
+    int hour = doc2["hour"];
+    int minute = doc2["minute"];
+    int second = doc2["second"];
+    int day = doc2["day"];
+    int month = doc2["month"];
+    int year = doc2["year"];
+
+    setTime(hour, minute, second, day, month, year);
+
     digitalWrite(send_LedPin, HIGH);
     digitalWrite(receive_LedPin, LOW);
   }
 
-  delay(5000);
+  delay(2500);
 }
