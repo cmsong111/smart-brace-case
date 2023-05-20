@@ -1,4 +1,7 @@
 #include "BluetoothSerial.h"
+#include <ESP32Time.h>
+#include <ArduinoJson.h>
+
 
 //#define USE_PIN // Uncomment this to use PIN during pairing. The pin is specified on the line below
 const char *pin = "1234";  // Change this to a more secure PIN.
@@ -14,13 +17,28 @@ String device_name = "굴리오 ESP32";
 #endif
 
 BluetoothSerial SerialBT;
+StaticJsonDocument<200> doc;
+ESP32Time rtc(3600);  // offset in seconds GMT+1
+
 
 // LED on GP102
 int receive_LedPin = 22;  // 수신 시 점등 LED
 int send_LedPin = 23;     // 송신 시 점등 LED
 int IR_Sensor = 36;
 int IR_Value = 0;
-char str1[] = {  '{', '"', 's', 't', 'a', 't', 'u', 's', '"', ':', 't', 'r', 'u', 'e', '}' };
+
+void sendMessage(String message) {
+  // Json 메시지 전송
+  for (int i = 0; i < message.length(); i++) {
+    SerialBT.write(message[i]);
+  }
+  // 버퍼 비우기
+  SerialBT.flush();
+  
+  // 개행문자 추가
+  SerialBT.write(13);
+  SerialBT.write(10);
+}
 
 void setup() {
   pinMode(send_LedPin, OUTPUT);
@@ -32,32 +50,31 @@ void setup() {
   Serial.printf("The device with name \"%s\" is started.\nNow you can pair it with Bluetooth!\n", device_name.c_str());
 
   //Serial.printf("The device with name \"%s\" and MAC address %s is started.\nNow you can pair it with Bluetooth!\n", device_name.c_str(), SerialBT.getMacString()); // Use this after the MAC method is implemented
+  rtc.setTime(30, 24, 15, 17, 1, 2021);
 
 #ifdef USE_PIN
   SerialBT.setPin(pin);
   Serial.println("Using PIN");
+  doc["status"] = true;
 #endif
 }
 
 void loop() {
+  String output;
+
   IR_Value = digitalRead(IR_Sensor);
+  doc["time"] = rtc.getTime("%Y-%m-%d %H:%M:%S");
 
   if (IR_Value == HIGH) {
-
-    SerialBT.write(65);
-
+    doc["status"] = true;
     Serial.println("[적외선 센서] 물체 감지함!!");
   } else {
-
-    for (int i = 0; i < strlen(str1); i++) {
-      SerialBT.write(str1[i]);
-    }
-
-    SerialBT.write(13);
-    SerialBT.write(10);
-
+    doc["status"] = false;
     Serial.println("[적외선 센서] 감지되는 물체 없음...");
   }
+
+  serializeJson(doc, output);
+  sendMessage(output);
 
   if (Serial.available()) {  // Serial 값 송신 했을 때
     String input = Serial.readString();
@@ -73,5 +90,5 @@ void loop() {
     digitalWrite(receive_LedPin, LOW);
   }
 
-  delay(1000);
+  delay(5000);
 }
