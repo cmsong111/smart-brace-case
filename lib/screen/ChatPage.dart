@@ -188,9 +188,9 @@ class _ChatPage extends State<ChatPage> {
       }
     }
 
-    // Create message if there is new line character
+    // Create message if there is new line character or carriage return
     String dataString = String.fromCharCodes(buffer);
-    int index = buffer.indexOf(13);
+    int index = buffer.indexOf(10); // 변경: LF 문자(10)의 인덱스 검색
     if (~index != 0) {
       setState(() {
         messages.add(
@@ -202,7 +202,8 @@ class _ChatPage extends State<ChatPage> {
                 : _messageBuffer + dataString.substring(0, index),
           ),
         );
-        _messageBuffer = dataString.substring(index);
+        _messageBuffer =
+            '${dataString.substring(index + 1)}\r\n'; // 변경: CRLF 형식으로 변경
       });
     } else {
       _messageBuffer = (backspacesCounter > 0
