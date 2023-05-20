@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:intl/intl.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 
@@ -87,26 +89,32 @@ class _ChatPage extends State<ChatPage> {
   Widget build(BuildContext context) {
     final List<Row> list = messages.map((_message) {
       return Row(
-        children: <Widget>[
-          Container(
-            child: Text(
-                (text) {
-                  return text == '/shrug' ? '¯\\_(ツ)_/¯' : text;
-                }(_message.text.trim()),
-                style: TextStyle(color: Colors.white)),
-            padding: EdgeInsets.all(12.0),
-            margin: EdgeInsets.only(bottom: 8.0, left: 8.0, right: 8.0),
-            width: 222.0,
-            decoration: BoxDecoration(
-                color: _message.whom == clientID
-                    ? Colors.blueAccent
-                    : const Color.fromARGB(255, 151, 113, 218),
-                borderRadius: BorderRadius.circular(7.0)),
-          ),
-        ],
         mainAxisAlignment: _message.whom == clientID
             ? MainAxisAlignment.end
             : MainAxisAlignment.start,
+        children: <Widget>[
+          Row(
+            children: [
+              Container(
+                child: Text(
+                    (text) {
+                      return text == '/shrug' ? '¯\\_(ツ)_/¯' : text;
+                    }(_message.text.trim()),
+                    style: TextStyle(color: Colors.white)),
+                padding: EdgeInsets.all(12.0),
+                margin: EdgeInsets.only(bottom: 8.0, left: 8.0, right: 8.0),
+                width: 222.0,
+                decoration: BoxDecoration(
+                    color: _message.whom == clientID
+                        ? Colors.blueAccent
+                        : const Color.fromARGB(255, 151, 113, 218),
+                    borderRadius: BorderRadius.circular(7.0)),
+              ),
+              Text(DateFormat('HH:mm').format(DateTime.now()),
+                  style: const TextStyle(color: Colors.grey, fontSize: 12.0))
+            ],
+          ),
+        ],
       );
     }).toList();
 
