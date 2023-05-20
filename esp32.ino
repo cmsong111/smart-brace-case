@@ -19,7 +19,7 @@ String device_name = "굴리오 ESP32";
 BluetoothSerial SerialBT;
 DynamicJsonDocument doc(1024);
 DynamicJsonDocument doc2(1024);
-ESP32Time rtc(3600 * 9); // GMP + 9 Souel
+ESP32Time rtc(3600 * 0); // GMP + 9 Souel
 
 
 // LED on GP102
